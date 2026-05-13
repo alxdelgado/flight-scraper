@@ -1,6 +1,6 @@
 # Flight Price Optimizer
 
-Finds the best rate for a flight by comparing every trip structure — round-trip tickets vs. two separate one-way tickets — across all relevant airports for your destination. Uses **Google Flights data via SerpAPI** and factors in airline baggage fees so the comparison reflects what you actually pay.
+Finds the best rate for a flight by comparing every trip structure — round-trip tickets vs. two separate one-way tickets — across all relevant airports for your destination. Uses **Google Flights data via SerpAPI**, factors in airline baggage fees so the comparison reflects what you actually pay, and prints a **direct booking link** to Google Flights for each winning leg.
 
 ---
 
@@ -12,7 +12,7 @@ For any origin → destination pair the script runs up to three searches per des
 2. **One-way outbound** — origin → destination
 3. **One-way return** — destination → origin
 
-It then builds every combination of outbound + return one-ways (including mixed-airport combos, e.g. fly into JFK, leave from LGA) and scores each candidate on **effective price** — listed fare plus any carry-on or checked bag fees for that airline. The lowest-scoring candidate wins.
+It then builds every combination of outbound + return one-ways (including mixed-airport combos, e.g. fly into JFK, leave from LGA) and scores each candidate on **effective price** — listed fare plus any carry-on or checked bag fees for that airline. The lowest-scoring candidate wins, and the report prints a direct Google Flights booking link for each winning leg.
 
 ### Example output
 
@@ -37,8 +37,24 @@ WINNER: Two one-ways
   vs Best round-trip: $329.00 (ORD↔LGA)
   Savings  : $17.00 (effective price)
 
-  Note: Arrive EWR, depart from JFK — different NYC airports.
+  Note: Arrive EWR, depart from JFK — different airports.
+
+  Book outbound → https://www.google.com/travel/flights?tfs=<token>
+  Book return   → https://www.google.com/travel/flights?tfs=<token>
 ```
+
+---
+
+## Booking a Flight
+
+At the end of every report, the winner section includes a direct link to Google Flights:
+
+- **Round-trip winner** — one `Book now` link covering both legs
+- **Two one-ways winner** — separate `Book outbound` and `Book return` links, each opening the exact flight on Google Flights
+
+Links are generated from the `booking_token` (round-trips) or `departure_token` (one-ways) returned by SerpAPI. If a token is unavailable, the report falls back to a generic `google.com/flights` link.
+
+> Prices on Google Flights are live — the fare shown in the report may differ slightly by the time you click through. Book promptly once you find a good rate.
 
 ---
 
