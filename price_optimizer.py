@@ -311,8 +311,27 @@ def format_report(result: dict, depart_date: str, return_date: str,
             ob_dest = winner["outbound"]["destination"]
             ret_orig = winner["return"]["origin"]
             lines.append(
-                f"\n  Note: Arrive {ob_dest}, depart from {ret_orig} — different NYC airports."
+                f"\n  Note: Arrive {ob_dest}, depart from {ret_orig} — different airports."
             )
+
+        # Booking links
+        lines.append("")
+        if winner["type"] == "round-trip":
+            url = ob.get("booking_url")
+            if url:
+                lines.append(f"  Book now  → {url}")
+            else:
+                lines.append("  Book on Google Flights: https://www.google.com/flights")
+        else:
+            ret = winner["return"]
+            ob_url  = ob.get("booking_url")
+            ret_url = ret.get("booking_url")
+            if ob_url:
+                lines.append(f"  Book outbound → {ob_url}")
+            if ret_url:
+                lines.append(f"  Book return   → {ret_url}")
+            if not ob_url and not ret_url:
+                lines.append("  Book on Google Flights: https://www.google.com/flights")
 
     lines.append("")
     return "\n".join(lines)

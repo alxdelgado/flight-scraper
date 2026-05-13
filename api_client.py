@@ -136,6 +136,11 @@ def _parse_flight(
     # SerpAPI provides total_duration in minutes
     duration_mins = raw.get("total_duration")
 
+    # booking_token is present on round-trip results; departure_token on one-ways.
+    # Both resolve to the same Google Flights booking URL format.
+    token = raw.get("booking_token") or raw.get("departure_token")
+    booking_url = f"https://www.google.com/travel/flights?tfs={token}" if token else None
+
     return {
         "origin":         origin,
         "destination":    destination,
@@ -150,6 +155,8 @@ def _parse_flight(
         "arrival_time":   arrival_time,
         "scraped_at":     datetime.now(timezone.utc).isoformat(),
         "source":         "google_flights",
+        "booking_token":  token,
+        "booking_url":    booking_url,
     }
 
 
