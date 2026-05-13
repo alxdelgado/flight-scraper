@@ -1,0 +1,7 @@
+google-search-results>=2.4.2
+beautifulsoup4>=4.12.0
+python-dotenv>=1.0.0
+
+# Expedia scraper (fallback — not used by default)
+# playwright>=1.44.0
+# playwright-stealth>=1.0.6
