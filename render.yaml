@@ -1,0 +1,38 @@
+# Render Blueprint — deploys the FastAPI backend + PostgreSQL database.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Deploy steps:
+#   1. Push this repo to GitHub (already done).
+#   2. Go to https://dashboard.render.com → New → Blueprint.
+#   3. Connect the alxdelgado/flight-scraper repo.
+#   4. Render reads this file and provisions both resources automatically.
+#   5. After deploy, set SERPAPI_KEY in the web service environment tab.
+
+services:
+  - type: web
+    name: flight-price-optimizer
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+
+    envVars:
+      # Render injects DATABASE_URL automatically from the linked database below.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: flight-optimizer-db
+          property: connectionString
+
+      # Set SERPAPI_KEY manually in the Render dashboard after first deploy.
+      # Dashboard → flight-price-optimizer → Environment → Add env var.
+      - key: SERPAPI_KEY
+        sync: false
+
+databases:
+  - name: flight-optimizer-db
+    databaseName: flights
+    user: flights_user
+    plan: free
+    region: oregon

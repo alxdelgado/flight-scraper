@@ -208,6 +208,63 @@ Results are stored in `data/flights.db` (SQLite) so every run's winner is saved 
 
 ---
 
+## Deploying to Render (hosted API)
+
+The FastAPI backend can be deployed to Render's free tier in under 10 minutes using the included `render.yaml` Blueprint. This is required for the iOS app.
+
+### Prerequisites
+
+- [Render account](https://render.com) (free)
+- GitHub repo connected to Render (fork or push `alxdelgado/flight-scraper`)
+- SerpAPI key
+
+### Steps
+
+**1. Create a new Blueprint deployment**
+
+Go to [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint** → connect the `flight-scraper` repo. Render reads `render.yaml` and provisions both resources:
+
+| Resource | Plan | Cost |
+|---|---|---|
+| `flight-price-optimizer` (web service) | Free | $0 |
+| `flight-optimizer-db` (PostgreSQL) | Free | $0 |
+
+**2. Set your SerpAPI key**
+
+After the first deploy completes, go to:  
+**Dashboard → flight-price-optimizer → Environment → Add environment variable**
+
+```
+Key:   SERPAPI_KEY
+Value: your_actual_serpapi_key
+```
+
+Click **Save** — Render redeploys automatically.
+
+**3. Verify the deployment**
+
+```bash
+curl https://flight-price-optimizer.onrender.com/health
+# {"status":"ok","db":"ok","version":"1.0.0"}
+```
+
+**4. Test a search**
+
+```bash
+curl -X POST https://flight-price-optimizer.onrender.com/search \
+  -H "Content-Type: application/json" \
+  -d '{"origin":"ORD","destination":"NYC","depart_date":"2026-06-15","return_date":"2026-06-20"}'
+# {"search_id":"...","status":"running","total_sessions":9}
+```
+
+### Free tier notes
+
+- **Cold starts:** The free web service sleeps after 15 minutes of inactivity and takes ~30 seconds to wake. This is acceptable since searches take 2–5 minutes regardless.
+- **PostgreSQL expiry:** Render free PostgreSQL databases expire after **90 days**. Before expiry, upgrade to the $7/month Starter plan or export and reimport the data.
+- **Keep-warm option:** Use [UptimeRobot](https://uptimerobot.com) (free) to ping `/health` every 10 minutes and prevent cold starts.
+
+---
+
 ## Supported Regions
 
 | Region name | Airports | Countries |

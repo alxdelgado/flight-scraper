@@ -6,6 +6,7 @@ Endpoints:
   GET  /search/{id}     → poll status + results
   GET  /airports        → resolve airport query
   GET  /history         → recent search winners
+  GET  /health          → Render health check (DB connectivity)
 
 Run locally:
     uvicorn server:app --reload --port 8000
@@ -204,6 +205,30 @@ async def get_airports(q: Optional[str] = None) -> dict:
     return {
         "query":    q,
         "airports": [_airport_dict(c, AIRPORTS[c]) for c in codes if c in AIRPORTS],
+    }
+
+
+# ---------------------------------------------------------------------------
+# GET /health
+# ---------------------------------------------------------------------------
+
+@app.get("/health")
+async def health_check() -> dict:
+    """
+    Render health check endpoint. Returns 200 when the service is up.
+    Attempts a lightweight DB query to surface connectivity issues early.
+    """
+    db_status = "ok"
+    try:
+        await run_in_threadpool(recent_runs, 1)
+    except Exception as exc:
+        logger.warning("Health check DB query failed: %s", exc)
+        db_status = "error"
+
+    return {
+        "status":  "ok" if db_status == "ok" else "degraded",
+        "db":      db_status,
+        "version": "1.0.0",
     }
 
 
